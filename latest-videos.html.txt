@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aamari Odisha Admin - Manage Videos</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #fa9847 0%, #fdaf58 70%, #fff6e0 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    a {
+      color: #fa9847;
+      text-decoration: none;
+    }
+    a:hover {
+      color: #cb6c21;
+      text-decoration: underline;
+    }
+
+    /* Layout */
+    .admin-root {
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    aside.sidebar {
+      width: 260px;
+      background: linear-gradient(120deg, #ff921c 0%, #fdaf58 70%, #ffe280 100%);
+      color: #a23b23;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 20px 40px 24px;
+      box-shadow: 1px 0 16px rgba(240, 170, 80, 0.15);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+    }
+    .sidebar .logo-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+    .sidebar .logo-img {
+      height: 56px;
+      width: 56px;
+      border-radius: 12px;
+      background: #fff6e0;
+      box-shadow: 0 2px 10px #fde5c8;
+      object-fit: contain;
+    }
+    .site-title {
+      font-weight: 700;
+      font-size: 1.4rem;
+      line-height: 1.1;
+      color: #a23b23;
+    }
+    .site-tagline {
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      color: #cb6c21;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    nav.side-nav {
+      display: flex;
+      flex-direction: column;
+    }
+    nav.side-nav a.nav-item {
+      padding: 12px 24px;
+      font-size: 1em;
+      color: #933a0f;
+      border-left: 5px solid transparent;
+      margin-bottom: 6px;
+      border-radius: 0 8px 8px 0;
+      transition: background-color 0.2s ease, border-left-color 0.15s ease;
+    }
+    nav.side-nav a.nav-item:hover,
+    nav.side-nav a.nav-item.active {
+      background-color: #fff6e7;
+      border-left-color: #fa9847;
+      color: #ab4a15;
+      font-weight: 600;
+    }
+
+    /* Main panel */
+    main.main-panel {
+      margin-left: 260px;
+      padding: 28px 44px 38px 44px;
+      background: rgba(255, 255, 255, 0.92);
+      min-height: 100vh;
+      flex: 1;
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      user-select: none;
+    }
+    .topbar-title {
+      font-size: 1.6rem;
+      color: #b55c07;
+      font-weight: 700;
+    }
+    .topbar-icons {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .notification-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffcc80;
+      box-shadow: 0 0 6px #fa9847, 0 0 0 2px #fff;
+    }
+    .icon-btn {
+      background: #fffbe9;
+      border-radius: 50%;
+      padding: 8px 11px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+    .icon-btn:hover {
+      background-color: #fde6b8;
+    }
+
+    /* Add Video Panel */
+    .add-video-panel {
+      background: linear-gradient(99deg, #ffe9c7 60%, #fffbe4 100%);
+      border-radius: 18px;
+      padding: 28px 24px 26px 24px;
+      max-width: 520px;
+      box-shadow: 0 2px 16px #fde5c8;
+      margin-bottom: 38px;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #a23b23;
+      margin-bottom: 16px;
+    }
+    form.add-video-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 18px;
+      align-items: center;
+    }
+    form.add-video-form input[type="text"],
+    form.add-video-form input[type="url"] {
+      flex: 1 1 250px;
+      padding: 10px 14px;
+      font-size: 1rem;
+      border: 1.8px solid #fdaf58;
+      border-radius: 8px;
+      transition: border-color 0.15s ease;
+      outline-offset: 2px;
+    }
+    form.add-video-form input[type="text"]:focus,
+    form.add-video-form input[type="url"]:focus {
+      border-color: #fa9847;
+      outline: none;
+      box-shadow: 0 0 6px #faa02b80;
+    }
+    form.add-video-form button.save-btn {
+      padding: 12px 36px;
+      background: #fa9847;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      transition: background-color 0.25s ease;
+    }
+    form.add-video-form button.save-btn:hover {
+      background: #fdaf58;
+    }
+
+    /* Video List Table */
+    .video-table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: 0 2px 14px rgba(253, 175, 88, 0.10);
+      border-radius: 16px;
+      overflow: hidden;
+      background-color: #fffdf8;
+    }
+    .video-table thead {
+      background: #fff7ea;
+    }
+    .video-table th, .video-table td {
+      text-align: left;
+      padding: 14px 18px;
+      font-size: 1rem;
+      border-bottom: 1px solid #ffdb91;
+      vertical-align: middle;
+    }
+    .video-table thead th {
+      font-weight: 700;
+      color: #b06a1b;
+    }
+    .video-table tbody tr {
+      transition: background-color 0.2s;
+    }
+    .video-table tbody tr:hover {
+      background-color: #fdf1d3;
+    }
+    .video-table td.actions {
+      white-space: nowrap;
+      width: 110px;
+    }
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: #a23b23;
+      cursor: pointer;
+      font-size: 1.25rem;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    .btn-delete:hover {
+      color: #f6452a;
+    }
+    /* Responsive */
+
+    @media (max-width: 900px) {
+      main.main-panel {
+        padding: 24px 18px 30px 18px;
+        margin-left: 0;
+      }
+      aside.sidebar {
+        width: 220px;
+        position: relative;
+        height: auto;
+      }
+      .admin-root {
+        flex-direction: column;
+      }
+      form.add-video-form {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-root">
+    <aside class="sidebar">
+      <div class="logo-header">
+        <img src="logo.jpg" alt="Aamari Odisha Logo" class="logo-img" />
+        <div>
+          <div class="site-title">Aamari Odisha</div>
+          <div class="site-tagline">Admin Panel</div>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a href="#" class="nav-item">Dashboard</a>
+        <a href="#" class="nav-item active">Manage Videos</a>
+        <a href="#" class="nav-item">Manage Govt Jobs</a>
+        <a href="#" class="nav-item">Manage Govt Plans</a>
+        <a href="#" class="nav-item">Manage Govt Websites</a>
+        <a href="#" class="nav-item">Tools/Utilities</a>
+        <a href="#" class="nav-item">WhatsApp Community</a>
+        <a href="#" class="nav-item">Contact Settings</a>
+        <a href="#" class="nav-item">User Feedback</a>
+      </nav>
+    </aside>
+
+    <main class="main-panel">
+      <div class="topbar">
+        <span class="topbar-title">Manage Videos</span>
+        <div class="topbar-icons">
+          <span class="notification-dot"></span>
+          <span class="icon-btn" title="Settings">⚙️</span>
+          <span class="icon-btn" title="Profile">👤</span>
+        </div>
+      </div>
+
+      <section class="add-video-panel">
+        <div class="section-title">Add New Video</div>
+        <form id="addVideoForm" class="add-video-form">
+          <input type="text" id="title" placeholder="Title" required />
+          <input type="url" id="youtubeLink" placeholder="YouTube Video Link" required />
+          <input type="url" id="websiteLink" placeholder="Official Website Link (optional)" />
+          <button type="submit" class="save-btn">Save</button>
+        </form>
+      </section>
+
+      <section>
+        <div class="section-title" style="margin-bottom: 12px;">Video List</div>
+        <table class="video-table" id="videoTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>YouTube Link</th>
+              <th>Website</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows added by JS -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Manage in-memory Video list
+    let videos = [
+      {
+        id: 1,
+        title: 'Odisha CHSE Marksheet Guide',
+        youtube: 'https://www.youtube.com/watch?v=abc123',
+        website: 'https://chseodisha.nic.in'
+      }
+    ];
+
+    const form = document.getElementById('addVideoForm');
+    const tableBody = document.querySelector('#videoTable tbody');
+
+    function renderVideos() {
+      tableBody.innerHTML = '';
+      for (const v of videos) {
+        const tr = document.createElement('tr');
+        
+        // ID
+        const tdId = document.createElement('td');
+        tdId.textContent = v.id;
+        tr.appendChild(tdId);
+
+        // Title
+        const tdTitle = document.createElement('td');
+        tdTitle.textContent = v.title;
+        tr.appendChild(tdTitle);
+
+        // YouTube Link
+        const tdYT = document.createElement('td');
+        const ytLink = document.createElement('a');
+        ytLink.href = v.youtube;
+        ytLink.target = '_blank';
+        ytLink.rel = 'noopener noreferrer';
+        ytLink.textContent = 'Open';
+        ytLink.style.color = '#fa9847';
+        tdYT.appendChild(ytLink);
+        tr.appendChild(tdYT);
+
+        // Website Link
+        const tdWeb = document.createElement('td');
+        if (v.website?.trim()) {
+          const webLink = document.createElement('a');
+          webLink.href = v.website;
+          webLink.target = '_blank';
+          webLink.rel = 'noopener noreferrer';
+          webLink.textContent = 'Visit';
+          webLink.style.color = '#cb6c21';
+          tdWeb.appendChild(webLink);
+        } else {
+          tdWeb.textContent = '—';
+          tdWeb.style.color = '#888';
+        }
+        tr.appendChild(tdWeb);
+
+        // Actions
+        const tdActions = document.createElement('td');
+        tdActions.classList.add('actions');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-delete';
+        delBtn.title = 'Delete';
+        delBtn.innerHTML = '🗑️';
+        delBtn.onclick = () => {
+          if (confirm(`Delete video "${v.title}"?`)) {
+            videos = videos.filter(video => video.id !== v.id);
+            renderVideos();
+          }
+        };
+        tdActions.appendChild(delBtn);
+        tr.appendChild(tdActions);
+
+        tableBody.appendChild(tr);
+      }
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const title = form.title.value.trim();
+      const youtubeLink = form.youtubeLink.value.trim();
+      const websiteLink = form.websiteLink.value.trim();
+
+      if (!title || !youtubeLink) {
+        alert('Please enter Title and YouTube video link.');
+        return;
+      }
+      const newId = videos.length > 0 ? videos[videos.length - 1].id + 1 : 1;
+      videos.push({
+        id: newId,
+        title,
+        youtube: youtubeLink,
+        website: websiteLink
+      });
+
+      renderVideos();
+
+      form.reset();
+    });
+
+    // Initial render
+    renderVideos();
+  </script>
+</body>
+</html>
