@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aamari Odisha Admin - Manage Blogs</title>
+  <style>
+    /* Reset & base */
+    * { box-sizing: border-box; }
+    body, html {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #fa9847 0%, #fdaf58 70%, #fff6e0 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    a { color: #fa9847; text-decoration: none; }
+    a:hover { color: #cb6c21; text-decoration: underline; }
+
+    .admin-root { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    aside.sidebar {
+      width: 260px;
+      background: linear-gradient(120deg, #ff921c 0%, #fdaf58 70%, #ffe280 100%);
+      color: #a23b23;
+      display: flex; flex-direction: column;
+      padding: 28px 20px 40px 24px;
+      box-shadow: 1px 0 16px rgba(240, 170, 80, 0.15);
+      position: fixed; top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+    }
+    .sidebar .logo-header {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 40px;
+    }
+    .sidebar .logo-img {
+      height: 56px; width: 56px; border-radius: 12px;
+      background: #fff6e0; box-shadow: 0 2px 10px #fde5c8; object-fit: contain;
+    }
+    .site-title {
+      font-weight: 700; font-size: 1.4rem; line-height: 1.1; color: #a23b23;
+    }
+    .site-tagline {
+      font-size: 0.9rem; letter-spacing: 2px;
+      color: #cb6c21; font-weight: 600; margin-top: 2px;
+    }
+    nav.side-nav { display: flex; flex-direction: column; }
+    nav.side-nav a.nav-item {
+      padding: 12px 24px; font-size: 1em;
+      color: #933a0f; border-left: 5px solid transparent;
+      margin-bottom: 6px; border-radius: 0 8px 8px 0;
+      transition: background-color 0.2s, border-left-color 0.15s;
+    }
+    nav.side-nav a.nav-item:hover,
+    nav.side-nav a.nav-item.active {
+      background: #fff6e7; border-left-color: #fa9847; color: #ab4a15; font-weight: 600;
+    }
+
+    /* Main panel */
+    main.main-panel {
+      margin-left: 260px;
+      padding: 28px 44px 38px 44px;
+      background: rgba(255,255,255,0.92);
+      min-height: 100vh; flex: 1;
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; user-select: none;
+    }
+    .topbar-title { font-size: 1.6rem; color: #b55c07; font-weight: 700; }
+    .topbar-icons { display: flex; gap: 20px; align-items: center; }
+    .notification-dot { width: 16px; height: 16px; border-radius: 50%; background: #ffcc80; box-shadow: 0 0 6px #fa9847, 0 0 0 2px #fff; }
+    .icon-btn {
+      background: #fffbe9; border-radius: 50%;
+      padding: 8px 11px; font-size: 1.2rem; cursor: pointer; user-select: none;
+      transition: background-color 0.2s;
+    }
+    .icon-btn:hover { background-color: #fde6b8; }
+
+    /* Add Blog Panel */
+    .add-blog-panel {
+      background: linear-gradient(99deg,#ffe9c7 60%, #fffbe4 100%);
+      border-radius: 18px;
+      padding: 28px 24px 26px 24px;
+      max-width: 600px;
+      box-shadow: 0 2px 16px #fde5c8;
+      margin-bottom: 38px;
+    }
+    .section-title {
+      font-size: 1.25rem; font-weight: 600; color: #a23b23; margin-bottom: 16px;
+    }
+    form.add-blog-form {
+      display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: flex-start;
+    }
+    form.add-blog-form input[type="text"],
+    form.add-blog-form input[type="url"],
+    form.add-blog-form textarea {
+      flex: 1 1 250px;
+      padding: 10px 14px; font-size: 1rem;
+      border: 1.8px solid #fdaf58;
+      border-radius: 8px;
+      transition: border-color 0.15s;
+      outline-offset: 2px;
+    }
+    form.add-blog-form textarea {
+      min-height: 64px; resize: vertical; font-family: inherit;
+    }
+    form.add-blog-form input[type="text"]:focus,
+    form.add-blog-form input[type="url"]:focus,
+    form.add-blog-form textarea:focus {
+      border-color: #fa9847;
+      outline: none; box-shadow: 0 0 6px #faa02b80;
+    }
+    .form-label { display:block; font-size:0.97em; color:#a23b23; font-weight:500; margin-bottom:3px; }
+    .upload-wrap { display:flex; flex-direction:column; align-items:flex-start; }
+    .banner-preview {
+      display: block; margin-top: 6px; border-radius: 7px;
+      overflow: hidden; border: 1px solid #fdaf58;
+      width: 96px; height: 54px; object-fit: cover; background: #fff6e0;
+    }
+    .input-banner {
+      margin-top: 3px; font-size: 1em;
+    }
+    form.add-blog-form button.save-btn {
+      padding: 12px 36px;
+      background: #fa9847; border: none; border-radius: 8px;
+      font-weight: 700; color: white; cursor: pointer; font-size: 1.1rem; flex-shrink: 0;
+      transition: background-color 0.25s;
+    }
+    form.add-blog-form button.save-btn:hover { background: #fdaf58; }
+
+    /* Blog List */
+    .blog-list { max-width: 900px; margin: 0 auto 20px auto;}
+    .blog-card {
+      display: flex; gap: 18px; align-items: flex-start;
+      background: #fffdf8;
+      box-shadow: 0 2px 10px rgba(253, 174, 59, 0.06);
+      border-radius: 16px;
+      padding: 22px 16px 19px 16px;
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .blog-card .blog-banner {
+      width: 92px; height: 52px; border-radius: 7px; object-fit: cover; background: #fff6e0;
+      flex-shrink: 0;
+    }
+    .blog-details { flex: 1 1 0; }
+    .blog-title { font-size: 1.13em; color:#a23b23; font-weight:700; margin-bottom:3px; }
+    .blog-desc { font-size:1em; color:#333; margin-bottom:2px; margin-top:1px;}
+    .blog-link a { color: #cb6c21; font-size:0.97em; word-break:break-all; }
+    .btn-delete {
+      background:transparent; border:none; color:#a23b23; cursor:pointer;
+      font-size:1.22em; user-select: none;
+      position: absolute; top:10px; right:16px;
+      transition:color 0.18s;
+    }
+    .btn-delete:hover { color: #f6452a; font-weight: bold; }
+
+    @media (max-width: 900px) {
+      main.main-panel {padding: 24px 8px 30px 8px; margin-left: 0;}
+      aside.sidebar {width: 220px; position: relative; height: auto;}
+      .admin-root {flex-direction: column;}
+      form.add-blog-form {flex-direction: column; gap: 9px;}
+      .blog-card {flex-direction:column; align-items:flex-start;}
+      .blog-card .blog-banner {margin-bottom:9px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-root">
+    <aside class="sidebar">
+      <div class="logo-header">
+        <img src="logo.jpg" alt="Aamari Odisha Logo" class="logo-img" />
+        <div>
+          <div class="site-title">Aamari Odisha</div>
+          <div class="site-tagline">Admin Panel</div>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a href="#" class="nav-item">Dashboard</a>
+        <a href="#" class="nav-item">Manage Videos</a>
+        <a href="#" class="nav-item active">Manage Blogs</a>
+        <a href="#" class="nav-item">Manage Govt Jobs</a>
+        <a href="#" class="nav-item">Manage Govt Plans</a>
+        <a href="#" class="nav-item">Manage Govt Websites</a>
+        <a href="#" class="nav-item">Tools/Utilities</a>
+        <a href="#" class="nav-item">WhatsApp Community</a>
+        <a href="#" class="nav-item">Contact Settings</a>
+        <a href="#" class="nav-item">User Feedback</a>
+      </nav>
+    </aside>
+
+    <main class="main-panel">
+      <div class="topbar">
+        <span class="topbar-title">Manage Blogs</span>
+        <div class="topbar-icons">
+          <span class="notification-dot"></span>
+          <span class="icon-btn" title="Settings">⚙️</span>
+          <span class="icon-btn" title="Profile">👤</span>
+        </div>
+      </div>
+
+      <!-- Add Blog Panel -->
+      <section class="add-blog-panel">
+        <div class="section-title">Add New Blog/Vlog</div>
+        <form id="addBlogForm" class="add-blog-form" autocomplete="off" enctype="multipart/form-data">
+          <div style="flex:1 1 250px;">
+            <label class="form-label" for="title">Title</label>
+            <input type="text" id="title" placeholder="Title" required />
+          </div>
+          <div class="upload-wrap">
+            <label class="form-label" for="banner">Banner</label>
+            <input type="file" id="banner" accept="image/*" class="input-banner" />
+            <img id="bannerPreview" class="banner-preview" alt="Banner Preview" style="display:none;margin-top:6px;"/>
+          </div>
+          <div style="flex:1 1 350px;">
+            <label class="form-label" for="description">Description</label>
+            <textarea id="description" placeholder="Description" required></textarea>
+          </div>
+          <div style="flex:1 1 270px;">
+            <label class="form-label" for="link">Link</label>
+            <input type="url" id="link" placeholder="External Link" />
+          </div>
+          <button type="submit" class="save-btn" style="margin-top:29px;">Save</button>
+        </form>
+      </section>
+      <!-- Blog List -->
+      <section>
+        <div class="section-title" style="margin-bottom: 12px;">Blog/Vlog List</div>
+        <div class="blog-list" id="blogList">
+          <!-- Blog cards inserted by JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    // Manage in-memory Blog list
+    let blogs = [
+      {
+        id: 1,
+        title: 'Odisha CHSE Result — Step by Step Download',
+        banner: '', // empty means no pic
+        description: 'Learn how to quickly download your Odisha 12th marksheet from CHSE Odisha.',
+        link: 'https://chseodisha.nic.in'
+      }
+    ];
+    // Will hold banner as data-url for new blogs
+    let bannerDataURL = '';
+
+    const form = document.getElementById('addBlogForm');
+    const blogListDiv = document.getElementById('blogList');
+    const bannerInput = document.getElementById('banner');
+    const bannerPreview = document.getElementById('bannerPreview');
+
+    // Show preview and keep image as base64-url for display
+    bannerInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) {
+        bannerPreview.style.display = 'none';
+        bannerDataURL = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        bannerPreview.src = e.target.result;
+        bannerPreview.style.display = 'block';
+        bannerDataURL = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function renderBlogs() {
+      blogListDiv.innerHTML = '';
+      for (const b of blogs) {
+        const card = document.createElement('div');
+        card.className = 'blog-card';
+
+        // Banner
+        if (b.banner) {
+          const bannerImg = document.createElement('img');
+          bannerImg.src = b.banner;
+          bannerImg.alt = "Banner";
+          bannerImg.className = "blog-banner";
+          card.appendChild(bannerImg);
+        } else {
+          const placeholder = document.createElement('div');
+          placeholder.className = 'blog-banner';
+          placeholder.style.display = 'flex';
+          placeholder.style.alignItems = 'center';
+          placeholder.style.justifyContent = 'center';
+          placeholder.style.color = '#fdaf58';
+          placeholder.style.background = '#fff6e0';
+          placeholder.textContent = '—';
+          card.appendChild(placeholder);
+        }
+
+        // Details
+        const details = document.createElement('div');
+        details.className = 'blog-details';
+        const title = document.createElement('div');
+        title.className = 'blog-title';
+        title.textContent = b.title;
+        details.appendChild(title);
+
+        const desc = document.createElement('div');
+        desc.className = 'blog-desc';
+        desc.textContent = b.description;
+        details.appendChild(desc);
+
+        if (b.link && b.link.trim()) {
+          const linkDiv = document.createElement('div');
+          linkDiv.className = 'blog-link';
+          const a = document.createElement('a');
+          a.href = b.link; a.target = "_blank"; a.rel="noopener noreferrer"; a.textContent = b.link;
+          linkDiv.appendChild(a);
+          details.appendChild(linkDiv);
+        }
+
+        card.appendChild(details);
+
+        // Delete button
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-delete';
+        delBtn.title = 'Delete';
+        delBtn.innerHTML = '🗑️';
+        delBtn.onclick = () => {
+          if (confirm(`Delete blog "${b.title}"?`)) {
+            blogs = blogs.filter(blog => blog.id !== b.id);
+            renderBlogs();
+          }
+        };
+        card.appendChild(delBtn);
+
+        blogListDiv.appendChild(card);
+      }
+    }
+    // Handle Form submission
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const title = form.title.value.trim();
+      const description = form.description.value.trim();
+      const link = form.link.value.trim();
+
+      const newId = blogs.length > 0 ? blogs[blogs.length - 1].id + 1 : 1;
+
+      blogs.push({
+        id: newId,
+        title,
+        banner: bannerDataURL,
+        description,
+        link
+      });
+
+      renderBlogs();
+
+      // Reset form and banner preview
+      form.reset();
+      bannerPreview.style.display = 'none';
+      bannerPreview.src = '';
+      bannerDataURL = '';
+    });
+
+    // Initial render
+    renderBlogs();
+  </script>
+</body>
+</html>
