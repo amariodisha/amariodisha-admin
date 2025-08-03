@@ -1,37 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>amariodisha-admin</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aamari Odisha Admin Dashboard</title>
   <style>
-    html, body {
-      height: 100%;
+    /* ========== GLOBAL STYLES ========== */
+    html, body { height: 100%; box-sizing: border-box; padding:0; margin:0;}
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #fa9847 0%, #fdaf58 70%, #fff6e0 100%);
+      color: #333;
       margin: 0;
       padding: 0;
     }
-    body {
-      min-height: 100vh;
-      width: 100vw;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      background: #fff;
-      font-family: 'Segoe UI', Arial, sans-serif;
+    a { color: #fa9847; text-decoration: none; }
+    a:hover { color: #cb6c21; text-decoration: underline;}
+    /* ========== LOGIN POPUP ========== */
+    .login-modal-bg {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.13);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
     }
-    .main-title {
-      margin-top: 80px;
-      font-size: 2.2rem;
-      font-weight: bold;
-      color: #232323;
-      letter-spacing: 0.02em;
+    .login-modal {
+      background: #fff;
+      border-radius: 18px;
+      max-width: 370px; width: 97%;
+      box-shadow: 0 2px 26px #e7c7a0;
+      padding: 40px 30px 32px 30px;
+      display: flex; flex-direction: column;
+      align-items: stretch;
+      position:relative;
+      animation: popin .25s;
+    }
+    @keyframes popin {
+      from { opacity: 0; transform: scale(0.92);}
+      to   { opacity: 1; transform: scale(1);}
+    }
+    .login-modal h2 {
+      font-size: 1.43rem;
+      text-align:center;
+      font-weight: 700;
+      color: #a23b23;
+      margin-bottom: 25px;
+      margin-top: 0;
+    }
+    .login-modal label { font-weight:600; font-size:1em; margin-bottom:4px;}
+    .login-modal input[type="email"],
+    .login-modal input[type="password"] {
+      width: 100%;
+      padding: 12px 13px;
+      border-radius: 7px;
+      border: 1.7px solid #fdaf58;
+      font-size: 1em;
+      margin-bottom: 18px;
+      font-family: inherit;
+      background: #fffbe9;
+    }
+    .login-modal input:focus {
+      outline: none;
+      border-color: #fa9847;
+      box-shadow:0 0 7px #faa02b40;
+    }
+    .login-btn {
+      background: #fa9847;
+      color: #fff;
+      padding: 14px 0;
+      font-weight: 700;
+      border: none;
+      border-radius: 7px;
+      font-size: 1.03em;
+      cursor: pointer;
+      transition: background 0.18s;
+      margin-bottom: 16px;
+    }
+    .login-btn:hover {
+      background: #fdaf58;
+    }
+    .login-modal .bottom-links {
+      text-align:center;
+      font-size: 0.97em;
+      color: #cb6c21;
+    }
+    .login-modal .bottom-links button, .login-modal .bottom-links a{
+      background: none; border: none;
+      color: #fa9847; cursor: pointer;
+      font-size: inherit;
+      margin: 0;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .login-modal .bottom-links button:hover, .login-modal .bottom-links a:hover {
+      color: #a23b23;
+    }
+    .login-modal .error-msg {
+      color: #f6452a;
+      margin: 0 0 9px 0;
+      font-size: 0.97em;
       text-align: center;
+    }
+    .modal-close {
+      position: absolute; top: 12px; right: 17px;
+      font-size: 1.3em; color: #cb6c21;
+      background: none; border:none; cursor:pointer;
+    }
+    /* ========= DASHBOARD LAYOUT ========= */
+    .admin-root { display: flex; min-height: 100vh; }
+    /* Sidebar */
+    aside.sidebar {
+      width: 260px;
+      background: linear-gradient(120deg, #ff921c 0%, #fdaf58 70%, #ffe280 100%);
+      color: #a23b23;
+      display: flex; flex-direction: column;
+      padding: 28px 20px 40px 24px;
+      box-shadow: 1.5px 0 16px rgba(240,170,80,0.13);
+      position:fixed; left:0; top:0; bottom:0;
+      min-height:100vh;
+      z-index:3;
+      overflow-y: auto;
+    }
+    .sidebar .logo-header {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 37px;
+    }
+    .sidebar .logo-img {
+      height: 56px; width: 56px; border-radius: 12px;
+      background: #fff6e0; box-shadow: 0 2px 10px #fde5c8; object-fit: contain;
+    }
+    .site-title { font-weight: 700; font-size: 1.38rem; color: #a23b23;}
+    .site-tagline { font-size: 0.88rem; letter-spacing:2px; color: #cb6c21; font-weight:600; margin-top:2px;}
+    nav.side-nav { display: flex; flex-direction: column; }
+    nav.side-nav a.nav-item {
+      padding: 12px 24px; font-size: 1em; color: #933a0f;
+      border-left: 5px solid transparent; margin-bottom: 6px;
+      border-radius: 0 8px 8px 0;
+      transition: background 0.18s, border-left-color 0.13s;
+    }
+    nav.side-nav a.nav-item:hover, nav.side-nav a.nav-item.active {
+      background: #fff6e7; border-left-color: #fa9847; color: #ab4a15; font-weight: 600;
+    }
+
+    /* Main panel */
+    main.main-panel {
+      margin-left: 260px;
+      padding: 28px 44px 38px 44px;
+      background: rgba(255,255,255,0.92);
+      min-height:100vh;
+      flex:1;
+    }
+    /* Top bar */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; user-select: none;
+    }
+    .topbar-title { font-size: 1.55rem; color: #b55c07; font-weight: 700;}
+    .topbar-icons { display: flex; gap: 20px; align-items: center;}
+    .notification-dot { width: 16px; height: 16px; border-radius: 50%; background: #ffcc80; box-shadow: 0 0 6px #fa9847, 0 0 0 2px #fff;}
+    .icon-btn {
+      background: #fffbe9; border-radius: 50%; padding: 8px 11px;
+      font-size: 1.18em; cursor: pointer; border: none; transition: background 0.15s;
+    }
+    .icon-btn:hover { background:#fde6b8;}
+    /* ========== DASHBOARD WIDGETS ========= */
+    .dash-widgets {
+      display: flex; flex-wrap: wrap; gap: 22px; margin-top:28px; margin-bottom:42px;
+    }
+    .dash-widget {
+      background: linear-gradient(120deg, #ffead0 60%, #fffbe6 100%);
+      border-radius:17px; box-shadow:0 2px 13px #fde5c8; padding:32px 34px 22px 32px;
+      flex:1 1 212px; min-width: 220px;
+      display:flex; flex-direction:column; align-items:flex-start;
+      position:relative; transition: box-shadow 0.14s;
+    }
+    .dash-widget:hover { box-shadow:0 5px 22px #ffc889cd; }
+    .wdg-icon {
+      font-size:2em; margin-bottom:18px; color:#fa9847;
+      background:#fffbe9; border-radius: 10px; padding:7px 12px;
+      display:inline-block;
+    }
+    .wdg-label {color:#a23b23; font-weight:600; font-size:1.13em;}
+    .wdg-value {font-size:2.04em; color:#b55c07; font-weight:bold; margin-top:5px; font-family:sans-serif;}
+    /* ========== RESPONSIVE ========= */
+    @media (max-width: 900px) {
+      main.main-panel { padding: 12px 3vw 21px 12px; margin-left:0;}
+      aside.sidebar { width:195px;}
+      .dash-widget {min-width:109px;}
+    }
+    @media (max-width:600px) {
+      aside.sidebar { display:none;}
+      main.main-panel {padding:7px;}
+      .topbar-title {font-size:1em;}
+      .dash-widgets {flex-direction:column;}
+      .dash-widget {padding:14px; min-width:90px;}
     }
   </style>
 </head>
 <body>
-  <div class="main-title">amariodisha-admin</div>
+<div id="app"></div>
+<script>
+  // ----------- Demo Login State -------------
+  const userDB = [
+    {email: 'admin@aamariodisha.com', password: 'admin123'}, // You can change this for demo
+  ];
+  let isLoggedIn = false;
+
+  // ------------- Helper: Render Login Modal -------------
+  function renderLogin(showForgot) {
+    document.getElementById('app').innerHTML = `
+      <div class="login-modal-bg">
+        <form class="login-modal" onsubmit="return false;">
+          <h2>${!showForgot ? 'Admin Login' : 'Forgot Password'}</h2>
+          <div class="error-msg" id="loginError"></div>
+          ${!showForgot ? `
+            <label for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" autocomplete="email" required autofocus>
+            <label for="loginPass">Password</label>
+            <input id="loginPass" type="password" autocomplete="current-password" required>
+            <button class="login-btn" id="loginBtn">Login</button>
+            <div class="bottom-links">
+              <button id="forgotBtn" type="button">Forgot Password?</button>
+            </div>
+          ` : `
+            <label for="forgotEmail">Enter your registered Email</label>
+            <input id="forgotEmail" type="email" autocomplete="email" required autofocus>
+            <button class="login-btn" id="sendResetBtn">Send Reset Link</button>
+            <div class="bottom-links">
+              <button id="backLogin" type="button">Back to Login</button>
+            </div>
+          `}
+        </form>
+      </div>
+    `;
+    // UI handlers
+    if (!showForgot) {
+      document.getElementById('loginBtn').onclick = handleLogin;
+      document.getElementById('forgotBtn').onclick = () => renderLogin(true);
+    } else {
+      document.getElementById('sendResetBtn').onclick = handleForgot;
+      document.getElementById('backLogin').onclick = () => renderLogin(false);
+    }
+  }
+  // ---------- Helper: Render Dashboard Main --------------
+  function renderDashboard() {
+    document.getElementById('app').innerHTML = `
+      <div class="admin-root">
+        <aside class="sidebar">
+          <div class="logo-header">
+            <img src="logo.jpg" alt="Aamari Odisha Logo" class="logo-img" />
+            <div>
+              <div class="site-title">Aamari Odisha</div>
+              <div class="site-tagline">Admin Panel</div>
+            </div>
+          </div>
+          <nav class="side-nav">
+            <a href="#" class="nav-item active">Dashboard</a>
+            <a href="manage-videos.html" class="nav-item">Manage Videos</a>
+            <a href="manage-blogs.html" class="nav-item">Manage Blogs</a>
+            <a href="manage-govt-jobs.html" class="nav-item">Manage Govt Jobs</a>
+            <a href="manage-govt-plans.html" class="nav-item">Manage Govt Plans</a>
+            <a href="manage-govt-websites.html" class="nav-item">Manage Govt Websites</a>
+            <a href="#" class="nav-item">Tools/Utilities</a>
+            <a href="#" class="nav-item">WhatsApp Community</a>
+            <a href="#" class="nav-item">Contact Settings</a>
+            <a href="#" class="nav-item">User Feedback</a>
+            <a href="#" id="logoutLink" class="nav-item" style="color:#f6452a;margin-top:13px;">Logout</a>
+          </nav>
+        </aside>
+        <main class="main-panel">
+          <div class="topbar">
+            <span class="topbar-title">Dashboard Overview</span>
+            <div class="topbar-icons">
+              <span class="notification-dot"></span>
+              <span class="icon-btn" title="Settings">⚙️</span>
+              <span class="icon-btn" title="Profile">👤</span>
+            </div>
+          </div>
+          <div style="font-size:1.15em;color:#353;">Welcome, <b>Admin</b>! Use sidebar to manage your website content.</div>
+          <div class="dash-widgets">
+            <div class="dash-widget">
+              <span class="wdg-icon">🎥</span>
+              <span class="wdg-label">Latest Videos</span>
+              <span class="wdg-value">7</span>
+            </div>
+            <div class="dash-widget">
+              <span class="wdg-icon">📝</span>
+              <span class="wdg-label">Blogs/Vlogs</span>
+              <span class="wdg-value">4</span>
+            </div>
+            <div class="dash-widget">
+              <span class="wdg-icon">🏛️</span>
+              <span class="wdg-label">Govt Jobs</span>
+              <span class="wdg-value">12</span>
+            </div>
+            <div class="dash-widget">
+              <span class="wdg-icon">🌐</span>
+              <span class="wdg-label">Govt Websites</span>
+              <span class="wdg-value">15</span>
+            </div>
+          </div>
+          <div style="font-size:1em;color:#a23b23;">
+            <b>Quick admin panel demo:</b> Click left menu to go to management sections. <br>
+            For a real backend and live data, connect this to a database (Firebase, Supabase, etc.).
+          </div>
+        </main>
+      </div>
+    `;
+    document.getElementById('logoutLink').onclick = (e)=>{
+      e.preventDefault();
+      isLoggedIn = false;
+      renderLogin(false);
+    }
+  }
+  // ----------- Demo: Login ----------
+  function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errorMsg = document.getElementById('loginError');
+    // For demo: match only userDB
+    const found = userDB.find(u=>u.email===email && u.password===pass);
+    if (!found) {
+      errorMsg.textContent = "Invalid email or password";
+      return;
+    }
+    errorMsg.textContent = "";
+    isLoggedIn = true;
+    renderDashboard();
+  }
+  function handleForgot(e) {
+    e.preventDefault();
+    const forgotEmail = document.getElementById('forgotEmail').value.trim();
+    const errorMsg = document.getElementById('loginError');
+    if (!forgotEmail || !/^\S+@\S+\.\S+$/.test(forgotEmail)) {
+      errorMsg.textContent = "Enter a valid email address";
+      return;
+    }
+    // For demo: pretend to send
+    errorMsg.style.color = "#49d766";
+    errorMsg.textContent = "Reset link sent to " + forgotEmail + "!";
+    setTimeout(()=>{ errorMsg.textContent=""; errorMsg.style.color = "#f6452a"; }, 2400);
+  }
+  // Init
+  if (!isLoggedIn) renderLogin(false);
+  else renderDashboard();
+</script>
 </body>
 </html>
